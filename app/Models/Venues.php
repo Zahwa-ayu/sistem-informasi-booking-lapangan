@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Venues extends Model{
+    protected $fillable = [
+    'owner_id',
+    'name',
+    'address',
+    'description'
+   ];
+
+   public function fields(){
+    return $this->hasMany(Fields::class);
+   }
+
+   public function owner(){
+    return $this->belongsTo(User::class, 'owner_id');
+   }
+}
