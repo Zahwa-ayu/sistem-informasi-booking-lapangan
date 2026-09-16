@@ -1,74 +1,88 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Konfirmasi Checkout - SiBook Lapangan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <!-- Tambahkan ini di paling atas bagian card -->
-@if(session('error'))
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
-        {{ session('error') }}
-    </div>
-@endif
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md border">
-        <h1 class="text-2xl font-bold mb-4 text-gray-800">Konfirmasi Pemesanan</h1>
-        <p class="text-sm text-gray-600 mb-6">Periksa kembali rincian pemesanan kamu sebelum melanjutkan ke pembayaran.</p>
+@extends('layouts.app')
 
-        <!-- Informasi Lapangan -->
-        <div class="bg-gray-50 p-4 rounded-lg border mb-6">
-            <h2 class="font-bold text-lg text-gray-800">{{ $field->name }}</h2>
-            <p class="text-sm text-gray-600">📍 {{ $field->venue->name }} - {{ $field->venue->address }}</p>
-            <p class="text-sm text-green-600 font-semibold mt-1">
-                Rp {{ number_format($field->price_per_hour, 0, ',', '.') }} / jam
-            </p>
+@section('title', 'Konfirmasi Checkout - SiBook Lapangan')
+
+@section('content')
+    <div class="max-w-2xl mx-auto space-y-6">
+        
+        {{-- Card Utama --}}
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200/80">
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight mb-1">Konfirmasi Pemesanan</h1>
+            <p class="text-xs md:text-sm text-gray-500 mb-6">Periksa kembali rincian pemesanan kamu sebelum melanjutkan ke pembayaran.</p>
+
+            <!-- Informasi Lapangan -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 mb-6 flex justify-between items-start gap-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded tracking-wider">
+                        {{ $field->type ?? 'Lapangan' }}
+                    </span>
+                    <h2 class="font-bold text-base text-gray-900 mt-2">{{ $field->name }}</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        📍 {{ $field->venue->name ?? 'Venue' }} 
+                        @if(isset($field->venue->address))
+                            - {{ $field->venue->address }}
+                        @endif
+                    </p>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Tarif</span>
+                    <span class="text-xs font-bold text-emerald-600">
+                        Rp {{ number_format($field->price_per_hour, 0, ',', '.') }}<span class="text-[10px] font-normal text-gray-400"> / jam</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Detail Jadwal & Jam yang Dipilih -->
+            <div class="space-y-3 text-xs md:text-sm text-gray-700 mb-8 border-t border-b border-gray-100 py-4">
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-gray-500">Tanggal Main:</span>
+                    <span class="font-bold text-gray-900">{{ \Carbon\Carbon::parse($bookingDate)->isoFormat('D MMMM Y') }}</span>
+                </div>
+                
+                <div class="flex justify-between items-start py-1">
+                    <span class="text-gray-500 mt-1">Slot Jam Dipilih:</span>
+                    <div class="flex flex-wrap gap-1 justify-end max-w-xs">
+                        @foreach($selectedHours as $hour)
+                            <span class="bg-blue-50 text-blue-700 border border-blue-200/60 font-semibold px-2.5 py-1 rounded-md text-xs">
+                                {{ $hour }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-gray-500">Total Durasi:</span>
+                    <span class="font-bold text-gray-900">{{ count($selectedHours) }} Jam</span>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-dashed border-gray-200 text-base font-bold">
+                    <span class="text-gray-900">Total Pembayaran:</span>
+                    <span class="text-emerald-600 text-lg">Rp {{ number_format($totalPrice, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <!-- Form untuk Mengirim Data ke Method store() -->
+            <form action="{{ route('checkout.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="field_id" value="{{ $field->id }}">
+                <input type="hidden" name="booking_date" value="{{ $bookingDate }}">
+
+                <!-- Mengirimkan Array Jam yang Dipilih -->
+                @foreach($selectedHours as $hour)
+                    <input type="hidden" name="selected_hours[]" value="{{ $hour }}">
+                @endforeach
+
+                <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+                    <a href="{{ route('landing.show', $field->id) }}" class="text-xs font-semibold text-gray-500 hover:text-gray-800 transition py-2">
+                        &larr; Batalkan & Pilih Ulang Jam
+                    </a>
+                    
+                    <button type="submit" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Konfirmasi & Buat Pesanan</span>
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <!-- Detail Jadwal & Jam yang Dipilih -->
-        <div class="mb-6 space-y-2 text-sm text-gray-700">
-            <div class="flex justify-between border-b pb-2">
-                <span class="text-gray-500">Tanggal Main:</span>
-                <span class="font-bold">{{ \Carbon\Carbon::parse($bookingDate)->isoFormat('D MMMM Y') }}</span>
-            </div>
-            <div class="flex justify-between border-b pb-2">
-                <span class="text-gray-500">Slot Jam Dipilih:</span>
-                <span class="font-bold text-blue-600">
-                    @foreach($selectedHours as $hour)
-                        <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs mr-1">{{ $hour }}</span>
-                    @endforeach
-                </span>
-            </div>
-            <div class="flex justify-between border-b pb-2">
-                <span class="text-gray-500">Total Durasi:</span>
-                <span class="font-bold">{{ count($selectedHours) }} Jam</span>
-            </div>
-            <div class="flex justify-between pt-2 text-base font-bold">
-                <span>Total Pembayaran:</span>
-                <span class="text-green-600">Rp {{ number_format($totalPrice, 0, ',', '.') }}</span>
-            </div>
-        </div>
-
-        <!-- Form untuk Mengirim Data ke Method store() -->
-        <form action="{{ route('checkout.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="field_id" value="{{ $field->id }}">
-            <input type="hidden" name="booking_date" value="{{ $bookingDate }}">
-            
-            <!-- Mengirimkan Array Jam yang Dipilih -->
-            @foreach($selectedHours as $hour)
-                <input type="hidden" name="selected_hours[]" value="{{ $hour }}">
-            @endforeach
-
-            <div class="flex items-center justify-between mt-8">
-                <a href="{{ route('landing.show', $field->id) }}" class="text-sm text-gray-500 hover:underline">
-                    &larr; Batalkan & Pilih Ulang Jam
-                </a>
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg transition">
-                    Konfirmasi & Buat Pesanan
-                </button>
-            </div>
-        </form>
     </div>
-</body>
-</html>
+@endsection
