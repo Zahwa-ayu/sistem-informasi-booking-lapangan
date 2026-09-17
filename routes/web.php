@@ -3,8 +3,10 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FieldController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\VenueController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,7 +49,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Alur Pembayaran & Success State
-    // Route success diarahkan langsung ke PaymentController agar terpusat
     Route::get('/booking/success/{id}', [PaymentController::class, 'show'])->name('booking.success');
     Route::get('/payment/{bookingId}', [PaymentController::class, 'show'])->name('payment.show');
     Route::post('/payment/{bookingId}/simulate', [PaymentController::class, 'simulate'])->name('payment.simulate');
@@ -59,9 +60,33 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes (Hanya untuk user dengan role 'admin')
+| Admin Routes (Hanya untuk role 'admin')
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Venue Routes (Shared: Admin & Owner, dengan pembatasan per-method)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin,owner'])->group(function () {
+    Route::get('/venues', [VenueController::class, 'index'])->name('venues.index');
+    Route::get('/venues/{venue}', [VenueController::class, 'show'])->name('venues.show');
+    Route::get('/venues/{venue}/edit', [VenueController::class, 'edit'])->name('venues.edit');
+    Route::put('/venues/{venue}', [VenueController::class, 'update'])->name('venues.update');
+    Route::delete('/venues/{venue}', [VenueController::class, 'destroy'])->name('venues.destroy');
+
+    Route::post('/venues/{venue}/fields', [FieldController::class, 'store'])->name('fields.store');
+    Route::get('/fields/{field}/edit', [FieldController::class, 'edit'])->name('fields.edit');
+    Route::put('/fields/{field}', [FieldController::class, 'update'])->name('fields.update');
+    Route::delete('/fields/{field}', [FieldController::class, 'destroy'])->name('fields.destroy');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/venues/create', [VenueController::class, 'create'])->name('venues.create');
+    Route::post('/venues', [VenueController::class, 'store'])->name('venues.store');
 });

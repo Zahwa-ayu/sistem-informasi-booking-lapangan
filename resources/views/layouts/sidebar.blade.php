@@ -30,7 +30,34 @@
             </div>
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm">
-                @yield('sidebar-menu')
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition
+                              {{ request()->routeIs('admin.dashboard') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <span>📊</span> Dashboard
+                    </a>
+                @elseif(auth()->user()->role === 'owner')
+                    <a href="{{ route('owner.dashboard') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition
+                              {{ request()->routeIs('owner.dashboard') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <span>📊</span> Dashboard
+                    </a>
+                @endif
+
+                <a href="{{ route('venues.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition
+                          {{ request()->routeIs('venues.*') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <span>🏟️</span> Kelola Venue
+                </a>
+
+                @if(auth()->user()->role === 'admin')
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <span>📅</span> Kelola Booking
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <span>👥</span> Kelola User
+                    </a>
+                @endif
             </nav>
 
             <div class="p-3 border-t border-slate-800">
