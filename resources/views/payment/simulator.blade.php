@@ -44,10 +44,11 @@
             </form>
         @else
             <!-- Tampilan Jika Sudah Lunas -->
-            <div class="p-4 bg-green-50 border border-green-200 text-green-800 rounded text-center">
-                <p class="font-bold">Pembayaran Telah Selesai!</p>
-                <p class="text-xs mt-1">ID Transaksi: {{ $booking->payment->transaction_id ?? '-' }}</p>
-            </div>
+<div class="p-4 bg-green-50 border border-green-200 text-green-800 rounded text-center">
+    <p class="font-bold">Pembayaran Telah Selesai!</p>
+    <p class="text-xs mt-1">Metode: {{ $booking->payment->payment_method ?? '-' }}</p>
+    <p class="text-xs mt-1">Dibayar pada: {{ $booking->payment->paid_at ?? '-' }}</p>
+</div>
             <a href="{{ route('landing.index') }}" class="block text-center text-blue-600 text-sm mt-4 hover:underline">
                 &larr; Kembali ke Katalog
             </a>

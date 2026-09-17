@@ -43,7 +43,7 @@ class PaymentController extends Controller
                 Payments::create([
                     'booking_id'     => $booking->id,
                     'payment_method' => $request->payment_method ?? 'bank_transfer_mock',
-                    'payment_status' => 'success',
+                    'payments_status' => 'success',
                     'transaction_id' => 'SIM-' . strtoupper(\Illuminate\Support\Str::random(10)),
                     'paid_at'        => now(),
                 ]);

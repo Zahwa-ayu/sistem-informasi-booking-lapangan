@@ -8,12 +8,12 @@ class Payments extends Model{
     protected $fillable = [
     'booking_id',
     'payment_method',
-    'payment_status',
+    'payments_status',
     'transaction_id',
     'paid_at'
    ];
 public function payments(){
-    return $this->hasOne(Payments::class, 'booking_id');
+    return $this->hasOne(Bookings::class, 'booking_id');
 }
 
    }
