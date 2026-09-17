@@ -12,4 +12,8 @@ class Payments extends Model{
     'transaction_id',
     'paid_at'
    ];
+public function payments(){
+    return $this->hasOne(Payments::class, 'booking_id');
 }
+
+   }

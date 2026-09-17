@@ -9,6 +9,9 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
+    {{-- Slot buat halaman yang butuh script tambahan di <head>, misalnya
+         Snap.js Midtrans di halaman pembayaran. JANGAN dihapus. --}}
+    @stack('head')
 </head>
 <body class="bg-gray-100/70 text-gray-800 min-h-screen flex flex-col antialiased">
 

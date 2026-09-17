@@ -37,6 +37,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Alur Checkout
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
 
     // Handling jika user melakukan GET/Refresh di /checkout/process agar tidak throw error Method Not Allowed

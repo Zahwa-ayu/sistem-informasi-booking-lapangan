@@ -14,16 +14,13 @@ class CheckoutController extends Controller
 {
     public function process(Request $request)
     {
-        // 1. Validasi Input Data
         $request->validate([
             'field_id' => 'required|exists:fields,id',
             'booking_date' => 'required|date|after_or_equal:today',
             'selected_hours' => 'required',
         ]);
 
-        // 2. Format Input Jam
         $selectedHours = $request->selected_hours;
-
         if (is_string($selectedHours)) {
             $selectedHours = json_decode($selectedHours, true);
         }
@@ -32,12 +29,33 @@ class CheckoutController extends Controller
             return back()->with('error', 'Pilih minimal satu slot jam!');
         }
 
-        // Ambil data lapangan
-        $field = Fields::with('venue')->findOrFail($request->field_id);
-        $totalPrice = count($selectedHours) * $field->price_per_hour;
-        $bookingDate = $request->booking_date;
+        // Simpan ke session, bukan langsung return view
+        session([
+            'checkout_data' => [
+                'field_id' => $request->field_id,
+                'booking_date' => $request->booking_date,
+                'selected_hours' => $selectedHours,
+            ]
+        ]);
 
-        return view('checkout.index', compact('field', 'selectedHours', 'totalPrice', 'bookingDate'));
+        return redirect()->route('checkout.confirm');
+    }
+
+    public function confirm()
+    {
+    $data = session('checkout_data');
+
+    if (!$data) {
+        return redirect()->route('landing.index')
+            ->with('warning', 'Silakan pilih lapangan dan slot jam terlebih dahulu.');
+    }
+
+    $field = Fields::with('venue')->findOrFail($data['field_id']);
+    $selectedHours = $data['selected_hours'];
+    $bookingDate = $data['booking_date'];
+    $totalPrice = count($selectedHours) * $field->price_per_hour;
+
+    return view('checkout.index', compact('field', 'selectedHours', 'totalPrice', 'bookingDate'));
     }
 
     public function store(Request $request)
@@ -58,7 +76,7 @@ class CheckoutController extends Controller
                 
                 // A. Cegah Double Booking
                 $alreadyBooked = BookingDetails::where('field_id', $field->id)
-                    ->whereHas('booking', function ($query) use ($bookingDate) {
+                    ->whereHas('bookings', function ($query) use ($bookingDate) {
                         $query->where('booking_date', $bookingDate)
                               ->whereIn('status', ['paid', 'pending']);
                     })

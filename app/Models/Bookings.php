@@ -18,10 +18,10 @@ class Bookings extends Model{
    }
 
    public function details(){
-    return $this->hasMany(BookingDetails::class);
+    return $this->hasMany(BookingDetails::class, 'booking_id');
    }
 
-   public function payments(){
-    return $this->hasOne(Payments::class);
+   public function payment(){
+    return $this->hasOne(Payments::class, 'booking_id');
    }
 }

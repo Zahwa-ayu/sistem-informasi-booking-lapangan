@@ -13,17 +13,12 @@ class BookingDetails extends Model{
     'price'
    ];
 
-//    public function booking(){
-//     return $this->belongsTo(Bookings::class);
-//    }
-
     public function bookings()
     {
         return $this->belongsTo(Bookings::class, 'booking_id');
-        // Catatan: Jika nama model utamamu adalah 'Bookings' (jamak), ganti menjadi Booking::class -> Bookings::class
     }
 
-   public function fields(){
-    return $this->hasMany(Fields::class);
+   public function field(){
+    return $this->belongsTo(Fields::class, 'field_id');
    }
 }
